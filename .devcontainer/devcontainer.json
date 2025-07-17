@@ -1,0 +1,20 @@
+{
+  "name": "KETNAME VSCode Extension Dev Container",
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:18",
+  "features": {
+    "ghcr.io/devcontainers-contrib/features/npm-package:1": {
+      "packageName": "yo generator-code @google/gemini-cli",
+      "version": "latest"
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint"
+      ]
+    }
+  },
+  "forwardPorts": [],
+  "postCreateCommand": "npm install -g yo generator-code @google/gemini-cli",
+  "remoteUser": "node"
+}
