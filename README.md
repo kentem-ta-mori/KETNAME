@@ -1,71 +1,121 @@
-# ketname README
+# **プロダクト定義書: AI命名支援VSCode拡張機能**
 
-This is the README for your extension "ketname". After writing up a brief description, we recommend including the following sections.
+バージョン: 1.0
 
-## Features
+作成日: 2025/07/11
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+更新日: 2025/07/11
 
-For example if there is an image subfolder under your extension project workspace:
+## **1\. 背景と目的 (Why?)**
 
-\!\[feature X\]\(images/feature-x.png\)
+### **1.1. 解決する課題**
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+* **開発効率の低下:** 変数名やメソッド名を考案するのに時間がかかり、思考が中断される。  
+* **コード品質のばらつき:** チーム内での命名規則やドメイン（業務）用語の解釈に揺らぎが発生し、コードの可読性や保守性が低下する。  
+* **既存ツールの限界:** GitHub Copilotのような汎用AIツールは便利だが、プロジェクト固有のドメイン知識を深く反映させることが難しい。また、ライセンスコストの観点から、全開発メンバーに割り当てられていないケースがある。
 
-## Requirements
+### **1.2. プロダクトの目的**
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+* **可読性と保守性の向上:** 質の高い命名を効率的に行うことで、コードベース全体の品質を引き上げる。  
+* **ドメイン知識の形式知化と共有:** プロジェクト固有の用語やルールをファイルとして管理することで、チーム内での知識レベルを統一し、命名に関する認識を合わせる。  
+* **目的駆動命名の促進:** 「このコードは何をするのか」という目的（仕様）に基づいた命名を文化として根付かせる。
 
-## Extension Settings
+### **1.3. ターゲットユーザー**
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+* 自社（および、その各プロジェクト）の開発チーム。
 
-For example:
+## **2\. プロダクト概要 (What?)**
 
-This extension contributes the following settings:
+### **2.1. エレベーターピッチ**
 
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
+「日本語のコメントとプロジェクト固有のドメイン知識を深く理解し、文脈に合った最適な名前を提案してくれる、AI搭載のVSCode拡張機能」
 
-## Known Issues
+### **2.2. 主要な機能**
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+1. **日本語コメントからの命名提案機能:** コード上の日本語コメントを仕様として解釈し、命名を提案する。  
+2. **周辺コードの文脈理解機能:** 命名対象の周辺コードを読み取り、文脈に沿った提案を行う。  
+3. **ドメイン知識の反映機能:** プロジェクト固有の用語やルールを定義したファイルを読み込み、提案に反映させる。  
+4. **BYOK (Bring Your Own Key) 対応:** ユーザー自身のLLM APIキーを設定して利用できる。  
+5. **インタラクティブなUI:** 提案された名前の候補を一覧表示し、ユーザーが選択してコードに挿入できる。
 
-## Release Notes
+## **3\. 要求仕様・要件定義 (How?) \- v1.0 / MVP**
 
-Users appreciate release notes as you update your extension.
+### **3.1. 機能要件**
 
-### 1.0.0
+| 機能 | 仕様 |
+| :---- | :---- |
+| **命名依頼の操作** | ユーザーは特定のショートカットキー（例: Ctrl+Alt+N）を押して、命名提案機能を実行する。 |
+| **提案の表示** | VSCodeのクイックピック機能を使用し、候補を一覧表示する。\<br\>各候補には「名前 (name)」と「選定理由 (reason)」を併記する。\<br\>候補はAIの「自信度 (confidence)」が高い順に並べ替えて表示する。 |
+| **文脈の読み取り** | AIに渡すコードの文脈として、ユーザーがエディタ上で**選択した範囲のコードを取得する** 。 |
+| **ドメイン知識の管理** | ユーザーは、拡張機能用の設定JSONファイルに、ドメイン知識が記述されたファイルのパスを個別に指定する。 |
+| **APIキーの管理** | APIキーが未設定の状態で機能を実行しようとすると、「APIキーが未設定です。設定ファイルにAPIキーを入力してください」という旨のエラーメッセージを表示する。 |
+| **LLMの応答形式** | LLMは、指定されたJSON形式で応答を返す必要がある。 |
 
-Initial release of ...
+### **3.2. 非機能要件**
 
-### 1.0.1
+| 項目 | 要件 |
+| :---- | :---- |
+| **性能** | 命名依頼から候補が表示されるまでの応答時間は、概ね3秒以内を目指す。 |
+| **セキュリティ** | ユーザーが設定するAPIキーは、VSCodeのSecretStorage APIなどを利用し、安全に管理されることが望ましい。（MVPでは設定画面のパスワード形式でのマスクを検討） |
+| **UI/UX** | 最小限の設定で直感的に利用できることを目指す。 |
 
-Fixed issue #.
+## **4\. スコープ（範囲） \- v1.0 / MVP**
 
-### 1.1.0
+### **4.1. やること (In-Scope)**
 
-Added features X, Y, and Z.
+* 「3. 要求仕様・要件定義」に記載されたすべての機能の実装。  
+* 対応するLLMは、GoogleのGemini APIのみとする。  
+* 基本的なエラーハンドリング（APIキー未設定、API通信エラーなど）。
 
----
+### **4.2. やらないこと (Out-of-Scope)**
 
-## Following extension guidelines
+* 現在カーソルがある関数全体の自動取得機能。  
+* 右クリックのコンテキストメニューからの機能呼び出し。  
+* GUI（グラフィカルな画面）でのドメイン知識ファイル管理機能。  
+* 複数のLLM（OpenAIなど）への対応。  
+* LLMのファインチューニング機能。
 
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
+## **5\. 【参考】技術設計（ハイレベル）**
 
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
+* **コマンドハンドラ:** 処理全体の司令塔。ショートカットキーの命令を受け取り、各モジュールを呼び出す。  
+* **コンテキスト取得モジュール:** エディタからカーソル位置の関数やコメントを取得する。  
+* **設定・知識管理モジュール:** APIキーやドメイン知識ファイルのパスを読み込む。  
+* **LLMサービス:** プロンプトを組み立て、Gemini APIとの通信を行う。  
+* **UIモジュール:** クイックピックの表示と、選択結果のエディタへの挿入を行う。
 
-## Working with Markdown
+## **6\. 開発タスクブレークダウン（AI協調開発向け）**
 
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
+このセクションでは、本プロダクト（MVP）の開発に必要な作業をタスク単位に分解し、AI（大規模言語モデル）との協調開発を円滑に進めることを目的とします。各タスクは、AIがその目的、入力、出力を明確に理解できるように定義されています。
 
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
+### **フェーズ1: 基盤構築**
 
-## For more information
+| タスクID | タスク名 | 目的 | 入力 | 出力 | 担当 |
+| :---- | :---- | :---- | :---- | :---- | :---- |
+| 1-1 | プロジェクト初期設定 | VSCode拡張機能開発の土台を準備する。 | yo codeコマンドの実行。 | 拡張機能の雛形プロジェクト。 | 開発者 |
+| 1-2 | 外部ライブラリ導入 | API通信を容易にするためのライブラリを導入する。 | npm or yarn コマンド。 | axios等がインストールされたpackage.json。 | 開発者 |
 
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
+### **フェーズ2: 設定とデータ管理機能の実装**
 
-**Enjoy!**
+| タスクID | タスク名 | 目的 | 入力 | 出力 | 担当モジュール |
+| :---- | :---- | :---- | :---- | :---- | :---- |
+| 2-1 | APIキー読み込み処理 | VSCodeの設定からユーザー設定のAPIキーを安全に取得する。 | VSCode Workspace Configuration API。 | APIキーを文字列として返す関数。 | config\_manager.ts |
+| 2-2 | ドメイン知識パス読み込み処理 | 設定ファイルからドメイン知識ファイルのパスリストを取得する。 | 設定ファイル（JSON形式）のパス。 | ファイルパスの文字列配列を返す関数。 | config\_manager.ts |
+| 2-3 | ドメイン知識コンテンツ読み込み処理 | 指定パスのファイル内容を結合し、単一の文字列として取得する。 | ファイルパスの文字列配列。 | 結合されたドメイン知識の文字列を返す関数。 | config\_manager.ts |
+
+### **フェーズ3: コアロジック（LLM連携）の実装**
+
+| タスクID | タスク名 | 目的 | 入力 | 出力 | 担当モジュール |
+| :---- | :---- | :---- | :---- | :---- | :---- |
+| 3-1 | 選択範囲コード取得処理 | エディタで**ユーザーが選択している範囲**のソースコードを取得する。 | VSCode Text Editor API（**選択範囲オブジェクト**） 。   | **選択範囲**のコード文字列を返す関数。 | context\_provider.ts |
+| 3-2 | プロンプト生成処理 | 全情報を元に、LLMに送信する最終的なプロンプトを組み立てる。 | ドメイン知識、コードコンテキスト、コメント等。 | 完成したプロンプト文字列を返す関数。 | llm\_service.ts |
+| 3-3 | API通信処理 | Gemini APIにプロンプトを送信し、結果のJSON文字列を受け取る。 | プロンプト文字列、APIキー。 | APIからのレスポンス（JSON文字列）を返す非同期関数。 | llm\_service.ts |
+
+### **フェーズ4: UIと全体連携の実装**
+
+| タスクID | タスク名 | 目的 | 入力 | 出力 | 担当モジュール |
+| :---- | :---- | :---- | :---- | :---- | :---- |
+| 4-1 | コマンドとショートカットキー登録 | ユーザーが拡張機能を呼び出すためのトリガーを設定する。 | package.jsonへの定義、VSCode Commands API。 | 指定キーでコマンドが実行される状態。 | package.json, command\_handler.ts |
+| 4-2 | クイックピック表示処理 | LLMからの提案候補をユーザーに分かりやすく提示する。 | パース済みの提案オブジェクトの配列。 | 画面上部に表示されるクイックピックUI。 | ui\_provider.ts |
+| 4-3 | エディタへの挿入処理 | ユーザーが選択した名前をエディタの適切な位置に挿入する。 | 選択された名前の文字列。 | エディタのテキストが更新された状態。 | ui\_provider.ts |
+| 4-4 | 統合とエンドツーエンド処理 | 全モジュールを連携させ、一連の命名提案処理を完成させる。 | ショートカットキーの実行イベント。 | 完成した拡張機能の動作。 | command\_handler.ts |
+
