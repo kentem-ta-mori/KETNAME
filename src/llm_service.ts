@@ -1,7 +1,8 @@
 // src/llm_service.ts
 
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { LLMResponse } from './interfaces/llm_response.interface';
+// 修正: 改訂版のシステム憲法に準拠したインターフェースをインポートします
+import { LLMResult, LLMSuccessResponse, LLMErrorResponse, LLMErrorType } from './interfaces/llm_response.interface';
 
 /**
  * LLMに送信するプロンプトを組み立てます。
@@ -10,32 +11,32 @@ import { LLMResponse } from './interfaces/llm_response.interface';
  * @returns 組み立てられたプロンプト文字列。
  */
 export function generatePrompt(codeContext: string, domainKnowledge: string): string {
+  // 修正: テンプレートリテラル内でバッククオートを使用するため、\`\`\` のようにエスケープします。
+  // また、プロンプト内のインターフェース定義を改訂版の憲法に合わせます。
   return `You are an AI assistant that helps developers name variables and methods.
 Your goal is to suggest high-quality names based on the provided Japanese comments and project-specific domain knowledge.
 
 Here is the code context:
-```
+\`\`\`typescript
 ${codeContext}
-```
+\`\`\`
 
 Here is the project-specific domain knowledge:
-```
+\`\`\`
 ${domainKnowledge}
-```
+\`\`\`
 
 Based on the above context and domain knowledge, please suggest 3 variable/method names that are concise, descriptive, and idiomatic for the given code. Provide a reason for each suggestion and a confidence score between 0.0 and 1.0.
 
-Your response must be a JSON string strictly adhering to the following TypeScript interface:
+Your response must be a JSON string strictly adhering to the following TypeScript interface. The 'suggestions' array must be sorted in descending order of confidence.
 
-interface LLMResponse {
+interface LLMSuccessResponse {
   suggestions: {
-    name: string;        // Suggested name
-    reason: string;      // Reason for the suggestion
-    confidence: number;  // Confidence score from 0.0 to 1.0
+    name: string;      // Suggested name
+    reason: string;    // Reason for the suggestion
+    confidence: number; // Confidence score from 0.0 to 1.0
   }[];
 }
-
-The suggestions array must be sorted in descending order of confidence.
 
 Example:
 {
@@ -56,13 +57,12 @@ Example:
 }
 
 /**
- * Gemini APIにプロンプトを送信し、結果のJSON文字列を受け取ります。
+ * Gemini APIにプロンプトを送信し、結果をLLMResult型で受け取ります。
  * @param apiKey Gemini APIキー。
  * @param prompt 送信するプロンプト文字列。
- * @returns LLMResponseインターフェースに準拠した結果オブジェクト。
- * @throws API通信エラーやレスポンスのパースエラーが発生した場合。
+ * @returns 成功または失敗を示すLLMResultオブジェクト。
  */
-export async function callGeminiApi(apiKey: string, prompt: string): Promise<LLMResponse> {
+export async function callGeminiApi(apiKey: string, prompt: string): Promise<LLMResult> {
   const genAI = new GoogleGenerativeAI(apiKey);
   const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
@@ -71,15 +71,36 @@ export async function callGeminiApi(apiKey: string, prompt: string): Promise<LLM
     const response = await result.response;
     const text = response.text();
 
-    // LLMResponseインターフェースに厳密に準拠しているか検証
-    const parsedResponse: LLMResponse = JSON.parse(text);
+    // 修正: レスポンスをパースし、LLMSuccessResponseとして扱います
+    const parsedResponse: LLMSuccessResponse = JSON.parse(text);
 
-    // suggestions配列がconfidenceの高い順にソートされているか検証
-    parsedResponse.suggestions.sort((a, b) => b.confidence - a.confidence);
+    // 憲法の要件ですが、念のためクライアントサイドでもソートを実行し、堅牢性を高めます。
+    if (parsedResponse.suggestions && Array.isArray(parsedResponse.suggestions)) {
+        parsedResponse.suggestions.sort((a, b) => b.confidence - a.confidence);
+    } else {
+        // suggestionsがない、または配列でない場合はパースエラーと見なします
+        throw new Error("Invalid response format: 'suggestions' property is missing or not an array.");
+    }
 
-    return parsedResponse;
+    // 修正: 憲法に従い、成功オブジェクトを返します
+    return { success: true, data: parsedResponse };
   } catch (error) {
     console.error("Error calling Gemini API or parsing response:", error);
-    throw new Error(`Failed to get naming suggestions from AI: ${error instanceof Error ? error.message : String(error)}`);
+
+    // 修正: 憲法に従い、エラーの種類を判別して失敗オブジェクトを返します
+    let errorType: LLMErrorType = 'UNKNOWN_ERROR';
+    let message = 'An unknown error occurred while getting suggestions.';
+
+    if (error instanceof SyntaxError) {
+      errorType = 'PARSING_ERROR';
+      message = 'Failed to parse the response from the AI. The format was invalid.';
+    } else if (error instanceof Error) {
+      // APIからのエラーやネットワークエラーなどを包括的に扱います
+      errorType = 'API_ERROR';
+      message = `An error occurred while communicating with the AI: ${error.message}`;
+    }
+
+    const errorResponse: LLMErrorResponse = { type: errorType, message };
+    return { success: false, error: errorResponse };
   }
 }

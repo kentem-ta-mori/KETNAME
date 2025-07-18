@@ -4,7 +4,7 @@ import * as vscode from 'vscode';
 import { getApiKey, getDomainKnowledgePaths, getDomainKnowledgeContent, setApiKey } from './config_manager';
 import { getSelectedText } from './context_provider';
 import { generatePrompt, callGeminiApi } from './llm_service';
-import { LLMResponse } from './interfaces/llm_response.interface';
+import { LLMResult, LLMSuccessResponse } from './interfaces/llm_response.interface';
 
 export function activate(context: vscode.ExtensionContext) {
 
@@ -50,14 +50,21 @@ export function activate(context: vscode.ExtensionContext) {
 			cancellable: false
 		}, async (progress) => {
 			try {
-				const llmResponse: LLMResponse = await callGeminiApi(apiKey!, prompt);
+				const llmResult = await callGeminiApi(apiKey!, prompt);
+
+			if (!llmResult.success) {
+				vscode.window.showErrorMessage(`Error getting naming suggestions from AI: ${llmResult.error.message}`);
+				return;
+			}
+
+			const llmResponse: LLMSuccessResponse = llmResult.data;
 
 				if (llmResponse.suggestions.length === 0) {
 					vscode.window.showInformationMessage('No naming suggestions found.');
 					return;
 				}
 
-				const quickPickItems: vscode.QuickPickItem[] = llmResponse.suggestions.map(s => ({
+				const quickPickItems: vscode.QuickPickItem[] = llmResponse.suggestions.map((s: { name: string; reason: string; confidence: number; }) => ({
 					label: s.name,
 					detail: s.reason,
 				}));

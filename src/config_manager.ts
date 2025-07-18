@@ -18,7 +18,7 @@ export async function getApiKey(context: vscode.ExtensionContext): Promise<strin
  * @param apiKey 保存するAPIキー
  */
 export async function setApiKey(context: vscode.ExtensionContext, apiKey: string): Promise<void> {
-  await context.secrets.set('geminiApiKey', apiKey);
+  await context.secrets.store('geminiApiKey', apiKey);
 }
 
 /**

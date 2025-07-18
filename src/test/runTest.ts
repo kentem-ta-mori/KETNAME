@@ -3,16 +3,14 @@ import { runTests } from '@vscode/test-electron';
 
 async function main() {
     try {
-        // The folder containing the Extension Manifest package.json
-        // Passed to `--extensionDevelopmentPath`
         const extensionDevelopmentPath = path.resolve(__dirname, '../../');
+        const extensionTestsPath = path.resolve(__dirname, './extension.spec.js'); // コンパイルされたJSファイルを指定
 
-        // The path to the extension test runner script
-        // Passed to --extensionTestsPath
-        const extensionTestsPath = path.resolve(__dirname, './extension.spec.ts');
-
-        // Download VS Code, unzip it and run the integration test
-        await runTests({ extensionDevelopmentPath, extensionTestsPath });
+        await runTests({
+            extensionDevelopmentPath,
+            extensionTestsPath,
+            launchArgs: ['--no-sandbox', '--enable-proposed-api'], // Electronに--no-sandboxと--enable-proposed-apiを渡す
+        });
     } catch (err) {
         console.error('Failed to run tests');
         process.exit(1);
