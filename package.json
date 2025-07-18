@@ -39,12 +39,11 @@
     "compile-tests": "tsc -p . --outDir out",
     "watch-tests": "tsc -p . -w --outDir out",
     "lint": "eslint src",
-    "test": "npm run compile-tests && DISPLAY=:99.0 xvfb-run node ./out/test/runTest.js"
+    "test": "jest"
   },
   "devDependencies": {
     "@types/glob": "^8.1.0",
     "@types/jest": "^30.0.0",
-    "@types/mocha": "^10.0.10",
     "@types/node": "20.x",
     "@types/vscode": "^1.102.0",
     "@typescript-eslint/eslint-plugin": "^8.31.1",
@@ -54,7 +53,6 @@
     "eslint": "^9.25.1",
     "glob": "^10.4.5",
     "jest": "^30.0.4",
-    "mocha": "^11.7.1",
     "ts-jest": "^29.4.0",
     "ts-loader": "^9.5.2",
     "typescript": "^5.8.3",
