@@ -16,6 +16,18 @@
       {
         "command": "ketname.helloWorld",
         "title": "Hello World"
+      },
+      {
+        "command": "ketname.suggestName",
+        "title": "Suggest Name"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "ketname.suggestName",
+        "key": "ctrl+alt+n",
+        "mac": "cmd+alt+n",
+        "when": "editorTextFocus"
       }
     ]
   },
