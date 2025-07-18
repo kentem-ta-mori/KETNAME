@@ -64,12 +64,19 @@ Example:
  */
 export async function callGeminiApi(apiKey: string, prompt: string): Promise<LLMResult> {
   const genAI = new GoogleGenerativeAI(apiKey);
-  const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite-preview-06-17" });
 
   try {
     const result = await model.generateContent(prompt);
     const response = await result.response;
-    const text = response.text();
+    let text = response.text();
+
+    // AIがMarkdown形式で応答を返す場合があるため、JSON部分のみを抽出する
+    const match = text.match(/```json\s*([\s\S]*?)\s*```/);
+    if (match) {
+      // マッチした場合、JSON部分（キャプチャグループの1番目）をtextに再代入
+      text = match[1];
+    }
 
     // 修正: レスポンスをパースし、LLMSuccessResponseとして扱います
     const parsedResponse: LLMSuccessResponse = JSON.parse(text);
