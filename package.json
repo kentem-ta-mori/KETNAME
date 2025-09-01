@@ -4,6 +4,10 @@
   "publisher": "ta-mori",
   "description": "AIが命名を支援するVSCode拡張機能",
   "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kentem-ta-mori/KETNAME.git"
+  },
   "engines": {
     "vscode": "^1.102.0"
   },
