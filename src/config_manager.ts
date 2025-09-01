@@ -22,6 +22,14 @@ export async function setApiKey(context: vscode.ExtensionContext, apiKey: string
 }
 
 /**
+ * APIキーをVSCodeのSecretStorageから削除します。
+ * @param context 拡張機能のコンテキスト
+ */
+export async function removeApiKey(context: vscode.ExtensionContext): Promise<void> {
+  await context.secrets.delete('geminiApiKey');
+}
+
+/**
  * VSCodeの設定からドメイン知識ファイルのパスリストを取得します。
  * @returns ドメイン知識ファイルのパスの文字列配列。
  */
