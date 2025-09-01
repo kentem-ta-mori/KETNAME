@@ -1,6 +1,7 @@
 {
   "name": "ketname",
   "displayName": "KETNAME",
+  "publisher": "ta-mori",
   "description": "AIが命名を支援するVSCode拡張機能",
   "version": "0.0.1",
   "engines": {
@@ -14,12 +15,16 @@
   "contributes": {
     "commands": [
       {
-        "command": "ketname.helloWorld",
-        "title": "Hello World"
+        "command": "ketname.suggestName",
+        "title": "KETNAME: 命名を提案"
       },
       {
-        "command": "ketname.suggestName",
-        "title": "Suggest Name"
+        "command": "ketname.setApiKey",
+        "title": "KETNAME: APIキーを設定"
+      },
+      {
+        "command": "ketname.removeApiKey",
+        "title": "KETNAME: APIキーを削除"
       }
     ],
     "keybindings": [
@@ -29,7 +34,25 @@
         "mac": "cmd+alt+n",
         "when": "editorTextFocus"
       }
-    ]
+    ],
+    "configuration": {
+      "title": "KETNAME",
+      "properties": {
+        "ketname.domainKnowledgePaths": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "title": "ドメイン知識・参考資料ファイルパス",
+          "markdownDescription": "命名提案の際にAIが参考にする「ドメイン知識」や「参考資料」が記述されたファイルのパスを設定します。\n\n- **複数指定可能**: 複数のファイルを指定できます。\n- **パス形式**: ワークスペースのルートディレクトリからの相対パス、または絶対パスで指定してください。\n- **推奨ファイル形式**: プロジェクト用語集、コーディング規約、仕様メモなどが記述されたテキストベースのファイル (`.md`, `.txt` など) を推奨します。"
+        },
+        "ketname.apiKeyInfo": {
+          "type": "null",
+          "markdownDescription": "APIキーはSecretStorageに安全に保管されます。キーを設定・更新するには[APIキーを設定](command:ketname.setApiKey)コマンドを、削除するには[APIキーを削除](command:ketname.removeApiKey)コマンドを実行してください。\n\n(注意: 「settings.jsonで編集」リンクが表示されますが、これはVSCodeの仕様によるものです。APIキーは`settings.json`には保存されないため、このリンクを操作する必要はありません。)"
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run package",
