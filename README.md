@@ -22,15 +22,36 @@ KETNAMEは、日本語のコメントや仕様メモから、プロジェクト�
 
 ## 必須要件
 
-- **Google Gemini APIキー**: 本拡張機能を使用するには、Google AI Studioで取得したAPIキーが必要です。
+- **LLMプロバイダーのAPIキー**: 本拡張機能は、Azure API Management (APIM) 経由、または直接 Google Gemini API を利用します。利用するプロバイダーに応じたAPIキーが必要です。
 
 ## セットアップ
 
-1.  VSCodeの **設定** を開きます (`File > Preferences > Settings` または `Ctrl/Cmd + ,`)。
-2.  検索バーに `KETNAME` と入力します。
-3.  `Ketname: Api Key Info` という項目にある `[APIキーを設定]` というリンクをクリックします。
-4.  画面上部に表示される入力ボックスに、あなたのGemini APIキーを入力してEnterキーを押します。
-    - APIキーはVSCodeのSecretStorageに安全に保管され、設定ファイルに平文で保存されることはありません。
+### 1. プロバイダーの選択
+
+1. VSCodeの **設定** を開きます (`File > Preferences > Settings` または `Ctrl/Cmd + ,`)。
+2. 検索バーに `ketname.provider` と入力します。
+3. 使用するLLMプロバイダーを `apim` (Azure APIM経由) または `gemini` (Google Gemini) から選択します。デフォルトは `apim` です。
+
+### 2. APIキーの設定
+
+選択したプロバイダーに応じて、対応するコマンドを実行してAPIキーを設定します。
+
+- **APIMの場合**: 
+  - コマンドパレット (`Ctrl/Cmd+Shift+P`) から `KETNAME: APIMキーを設定` を実行し、お使いのAPIMサブスクリプションキーを入力します。
+- **Geminiの場合**:
+  - コマンドパレットから `KETNAME: (旧)Gemini APIキーを設定` を実行し、お使いのGemini APIキーを入力します。
+
+APIキーはVSCodeのSecretStorageに安全に保管され、設定ファイルに平文で保存されることはありません。
+
+### 3. (APIMのみ) APIM固有設定
+
+APIMプロバイダーを選択した場合は、必要に応じて以下の設定を行ってください。
+
+1. VSCodeの **設定** を開きます。
+2. 検索バーに `ketname.apim` と入力します。
+3. 以下の項目を設定します:
+   - `ketname.apim.maxTokens`: モデルが生成する最大トークン数。
+   - `ketname.apim.temperature`: 生成されるテキストの多様性。
 
 ## 使用方法
 ※イメージは上記デモをご覧ください
@@ -71,13 +92,18 @@ KETNAMEは、日本語のコメントや仕様メモから、プロジェクト�
 | コマンド | タイトル | 説明 |
 | :--- | :--- | :--- |
 | `ketname.suggestName` | KETNAME: 命名を提案 | AIに命名候補を問い合わせ、選択した名前でプレースホルダーを置換します。 |
-| `ketname.setApiKey` | KETNAME: APIキーを設定 | Gemini APIキーを設定・更新します。 |
-| `ketname.removeApiKey` | KETNAME: APIキーを削除 | 設定されているGemini APIキーを削除します。 |
+| `ketname.setApimKey` | KETNAME: APIMキーを設定 | Azure APIMのサブスクリプションキーを設定・更新します。 |
+| `ketname.removeApimKey` | KETNAME: APIMキーを削除 | 設定されているAzure APIMのサブスクリプションキーを削除します。 |
+| `ketname.setGeminiApiKey` | KETNAME: (旧)Gemini APIキーを設定 | (旧プロバイダ用) Gemini APIキーを設定・更新します。 |
+| `ketname.removeGeminiApiKey` | KETNAME: (旧)Gemini APIキーを削除 | (旧プロバイダ用) 設定されているGemini APIキーを削除します。 |
 
 ## 設定項目
 
 | 設定項目 | 説明 | デフォルト値 |
 | :--- | :--- | :--- |
+| `ketname.provider` | 命名提案に使用するLLMプロバイダー。`apim` または `gemini`。 | `apim` |
+| `ketname.apim.maxTokens` | APIMモデルの最大生成トークン数。 | `512` |
+| `ketname.apim.temperature` | APIMモデルの生成温度。 | `0.2` |
 | `ketname.domainKnowledgePaths` | 命名提案の際にAIが参考にする「ドメイン知識」が記述されたファイルのパス。相対パス・絶対パスの両方に対応。 | `[]` |
 
 ## ライセンス

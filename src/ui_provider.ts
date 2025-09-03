@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { LLMSuccessResponse } from './interfaces/llm_response.interface';
+import { LLMSuccessResponse } from './llm/interfaces/llm_response.interface';
 
 /**
  * 日本語での命名意図をユーザーに尋ねる入力ボックスを表示します。

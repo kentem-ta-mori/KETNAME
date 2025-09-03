@@ -23,12 +23,20 @@
         "title": "KETNAME: 命名を提案"
       },
       {
-        "command": "ketname.setApiKey",
-        "title": "KETNAME: APIキーを設定"
+        "command": "ketname.setGeminiApiKey",
+        "title": "KETNAME: (旧)Gemini APIキーを設定"
       },
       {
-        "command": "ketname.removeApiKey",
-        "title": "KETNAME: APIキーを削除"
+        "command": "ketname.removeGeminiApiKey",
+        "title": "KETNAME: (旧)Gemini APIキーを削除"
+      },
+      {
+        "command": "ketname.setApimKey",
+        "title": "KETNAME: APIMキーを設定"
+      },
+      {
+        "command": "ketname.removeApimKey",
+        "title": "KETNAME: APIMキーを削除"
       }
     ],
     "keybindings": [
@@ -42,6 +50,26 @@
     "configuration": {
       "title": "KETNAME",
       "properties": {
+        "ketname.provider": {
+          "type": "string",
+          "enum": [
+            "apim",
+            "gemini"
+          ],
+          "default": "apim",
+          "description": "使用する命名提案プロバイダーを選択します。"
+        },
+        
+        "ketname.apim.maxTokens": {
+          "type": "number",
+          "default": 512,
+          "description": "APIM経由で呼び出すモデルの最大トークン数"
+        },
+        "ketname.apim.temperature": {
+          "type": "number",
+          "default": 0.2,
+          "description": "APIM経由で呼び出すモデルのTemperature"
+        },
         "ketname.domainKnowledgePaths": {
           "type": "array",
           "items": {
@@ -51,9 +79,9 @@
           "title": "ドメイン知識・参考資料ファイルパス",
           "markdownDescription": "命名提案の際にAIが参考にする「ドメイン知識」や「参考資料」が記述されたファイルのパスを設定します。\n\n- **複数指定可能**: 複数のファイルを指定できます。\n- **パス形式**: ワークスペースのルートディレクトリからの相対パス、または絶対パスで指定してください。\n- **推奨ファイル形式**: プロジェクト用語集、コーディング規約、仕様メモなどが記述されたテキストベースのファイル (`.md`, `.txt` など) を推奨します。"
         },
-        "ketname.apiKeyInfo": {
+        "ketname.geminiApiKeyInfo": {
           "type": "null",
-          "markdownDescription": "APIキーはSecretStorageに安全に保管されます。キーを設定・更新するには[APIキーを設定](command:ketname.setApiKey)コマンドを、削除するには[APIキーを削除](command:ketname.removeApiKey)コマンドを実行してください。\n\n(注意: 「settings.jsonで編集」リンクが表示されますが、これはVSCodeの仕様によるものです。APIキーは`settings.json`には保存されないため、このリンクを操作する必要はありません。)"
+          "markdownDescription": "Gemini APIキーはSecretStorageに安全に保管されます。キーを設定・更新するには[APIキーを設定](command:ketname.setGeminiApiKey)コマンドを、削除するには[APIキーを削除](command:ketname.removeGeminiApiKey)コマンドを実行してください。\n\n(注意: 「settings.jsonで編集」リンクが表示されますが、これはVSCodeの仕様によるものです。APIキーは`settings.json`には保存されないため、このリンクを操作する必要はありません。)"
         }
       }
     }
@@ -87,6 +115,7 @@
     "webpack-cli": "^6.0.1"
   },
   "dependencies": {
-    "@google/generative-ai": "^0.24.1"
+    "@google/generative-ai": "^0.24.1",
+    "undici": "^7.15.0"
   }
 }

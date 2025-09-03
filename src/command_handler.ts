@@ -1,9 +1,11 @@
 import * as vscode from 'vscode';
-import { getApiKey, getDomainKnowledgePaths, getDomainKnowledgeContent, setApiKey } from './config_manager';
+import { getDomainKnowledgePaths, getDomainKnowledgeContent, getGeminiApiKey, setGeminiApiKey } from './config_manager';
 import { getNamingContext } from './context_provider';
-import { generatePrompt, callGeminiApi } from './llm_service';
 import { showNamingSuggestions, promptForNamingIntent, showContextSizeWarning } from './ui_provider';
-import { LLMSuccessResponse } from './interfaces/llm_response.interface';
+import { LLMSuccessResponse, LLMResult } from './llm/interfaces/llm_response.interface';
+import { callApimForSuggestions } from './llm/callApim';
+import { callGeminiApi } from './llm/callGemini';
+import { generatePrompt } from './generatePrompt';
 
 const MAX_CONTEXT_LENGTH = 3000;
 
@@ -14,14 +16,12 @@ export async function handleSuggestName(context: vscode.ExtensionContext) {
         return;
     }
 
-    // 1. コンテキストの取得
     const codeContext = getNamingContext();
     if (!codeContext) {
         vscode.window.showInformationMessage('命名のコンテキストとなるコードが見つかりません。');
         return;
     }
 
-    // 2. コンテキストの文字数チェックと警告
     if (codeContext.length > MAX_CONTEXT_LENGTH) {
         const proceed = await showContextSizeWarning(codeContext.length);
         if (!proceed) {
@@ -29,34 +29,15 @@ export async function handleSuggestName(context: vscode.ExtensionContext) {
         }
     }
 
-    // 3. 日本語の意図の取得
     const userIntent = await promptForNamingIntent();
     if (!userIntent) {
         vscode.window.showInformationMessage('命名の意図が入力されませんでした。');
         return;
     }
 
-    // APIキーの取得と設定（初回のみ）
-    let apiKey = await getApiKey(context);
-    if (!apiKey) {
-        vscode.window.showErrorMessage('Gemini API Keyが設定されていません。VSCode Secret Storageに設定してください。');
-        const inputApiKey = await vscode.window.showInputBox({
-            prompt: 'Gemini API Keyを入力してください',
-            ignoreFocusOut: true,
-        });
-        if (inputApiKey) {
-            await setApiKey(context, inputApiKey);
-            apiKey = inputApiKey;
-        } else {
-            return;
-        }
-    }
-
-    // ドメイン知識の取得
     const domainKnowledgePaths = getDomainKnowledgePaths();
     const domainKnowledge = await getDomainKnowledgeContent(domainKnowledgePaths);
 
-    // プレースホルダーの判定
     const documentText = editor.document.getText();
     let placeholder: string | undefined;
     if (documentText.includes('KV')) {
@@ -68,15 +49,40 @@ export async function handleSuggestName(context: vscode.ExtensionContext) {
         return;
     }
 
-    // プロンプト生成とAPI呼び出し
     vscode.window.withProgress({
         location: vscode.ProgressLocation.Notification,
         title: "命名候補を生成中...",
         cancellable: false
     }, async (progress) => {
         try {
-            const prompt = generatePrompt(codeContext, userIntent, domainKnowledge);
-            const llmResult = await callGeminiApi(apiKey!, prompt);
+            const config = vscode.workspace.getConfiguration('ketname');
+            const provider = config.get<string>('provider');
+
+            let llmResult: LLMResult;
+
+            if (provider === 'apim') {
+                llmResult = await callApimForSuggestions(context, codeContext, userIntent, domainKnowledge);
+            } else if (provider === 'gemini') {
+                let apiKey = await getGeminiApiKey(context);
+                if (!apiKey) {
+                    const inputApiKey = await vscode.window.showInputBox({
+                        prompt: 'Gemini API Keyを入力してください',
+                        ignoreFocusOut: true,
+                    });
+                    if (inputApiKey) {
+                        await setGeminiApiKey(context, inputApiKey);
+                        apiKey = inputApiKey;
+                    } else {
+                        vscode.window.showErrorMessage('Gemini API Keyが設定されていません。');
+                        return;
+                    }
+                }
+                const prompt = generatePrompt(codeContext, userIntent, domainKnowledge);
+                llmResult = await callGeminiApi(apiKey, prompt);
+            } else {
+                vscode.window.showErrorMessage(`無効なプロバイダーが設定されています: ${provider}`);
+                return;
+            }
 
             if (!llmResult.success) {
                 vscode.window.showErrorMessage(`AIからの命名候補取得中にエラーが発生しました: ${llmResult.error.message}`);
@@ -85,11 +91,9 @@ export async function handleSuggestName(context: vscode.ExtensionContext) {
 
             const llmResponse: LLMSuccessResponse = llmResult.data;
 
-            // 命名候補の表示と選択
             const selectedName = await showNamingSuggestions(llmResponse);
 
             if (selectedName) {
-                // プレースホルダーの置換
                 const edit = new vscode.WorkspaceEdit();
                 const fullRange = new vscode.Range(editor.document.positionAt(0), editor.document.positionAt(documentText.length));
                 const text = editor.document.getText(fullRange);

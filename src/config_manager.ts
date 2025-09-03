@@ -4,29 +4,31 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
 
+const GEMINI_API_KEY_SECRET_KEY = 'ketname.geminiApiKey';
+
 /**
- * APIキーをVSCodeのSecretStorageから安全に取得します。
+ * Gemini APIキーをVSCodeのSecretStorageから安全に取得します。
  * @returns 取得したAPIキー、または未設定の場合はundefinedを返します。
  */
-export async function getApiKey(context: vscode.ExtensionContext): Promise<string | undefined> {
-  return await context.secrets.get('geminiApiKey');
+export async function getGeminiApiKey(context: vscode.ExtensionContext): Promise<string | undefined> {
+  return await context.secrets.get(GEMINI_API_KEY_SECRET_KEY);
 }
 
 /**
- * APIキーをVSCodeのSecretStorageに安全に保存します。
+ * Gemini APIキーをVSCodeのSecretStorageに安全に保存します。
  * @param context 拡張機能のコンテキスト
  * @param apiKey 保存するAPIキー
  */
-export async function setApiKey(context: vscode.ExtensionContext, apiKey: string): Promise<void> {
-  await context.secrets.store('geminiApiKey', apiKey);
+export async function setGeminiApiKey(context: vscode.ExtensionContext, apiKey: string): Promise<void> {
+  await context.secrets.store(GEMINI_API_KEY_SECRET_KEY, apiKey);
 }
 
 /**
- * APIキーをVSCodeのSecretStorageから削除します。
+ * Gemini APIキーをVSCodeのSecretStorageから削除します。
  * @param context 拡張機能のコンテキスト
  */
-export async function removeApiKey(context: vscode.ExtensionContext): Promise<void> {
-  await context.secrets.delete('geminiApiKey');
+export async function removeGeminiApiKey(context: vscode.ExtensionContext): Promise<void> {
+  await context.secrets.delete(GEMINI_API_KEY_SECRET_KEY);
 }
 
 /**
