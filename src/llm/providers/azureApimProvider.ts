@@ -6,13 +6,13 @@ export class AzureApimProvider implements LLMProvider {
         baseUrl: string;
         subscriptionKey: string;
         model: string;
-        defaultTemperature?: number;
         defaultMaxTokens?: number;
+        response_format: any;
     }) { }
 
-    async chat(messages: ChatMessage[], params?: { temperature?: number; maxTokens?: number }): Promise<string> {
+    async chat(messages: ChatMessage[], params?: { maxTokens?: number }): Promise<string> {
         const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 30000); // 30s timeout
+                const timeout = setTimeout(() => controller.abort(), 120000); // 120s timeout
 
         try {
             const res = await fetch(`${this.opts.baseUrl}/chat`, {
@@ -24,8 +24,7 @@ export class AzureApimProvider implements LLMProvider {
                 body: JSON.stringify({
                     model: this.opts.model,
                     messages,
-                    temperature: params?.temperature ?? this.opts.defaultTemperature ?? 0.2,
-                    max_tokens: params?.maxTokens ?? this.opts.defaultMaxTokens ?? 512
+                    max_completion_tokens: params?.maxTokens ?? this.opts.defaultMaxTokens ?? 512
                 }),
                 signal: controller.signal
             });

@@ -8,9 +8,8 @@ import { ChatMessage } from './providers/types';
 export async function callApimForSuggestions(context: vscode.ExtensionContext, codeContext: string, userIntent: string, domainKnowledge: string): Promise<LLMResult> {
     const config = vscode.workspace.getConfiguration('ketname');
     const baseUrl = 'https://apim-ketname.azure-api.net/llm';
-    const model = 'Phi-4-mini-reasoning';
+    const model = 'gpt-5-nano';
     const maxTokens = config.get<number>('apim.maxTokens');
-    const temperature = config.get<number>('apim.temperature');
 
     const subscriptionKey = await getApimSubscriptionKey(context);
     if (!subscriptionKey) {
@@ -19,7 +18,7 @@ export async function callApimForSuggestions(context: vscode.ExtensionContext, c
     }
 
     // The prompt from generatePrompt is a detailed instruction for an LLM, which we can use as the user message.
-    const systemPrompt = "";
+    const systemPrompt = "返答は厳密にJSON。前後の説明文・マークダウン・<think>タグを一切含めないこと。";
     const userPrompt = generatePrompt(codeContext, userIntent, domainKnowledge);
 
     const messages: ChatMessage[] = [
@@ -33,7 +32,7 @@ export async function callApimForSuggestions(context: vscode.ExtensionContext, c
             subscriptionKey,
             model,
             defaultMaxTokens: maxTokens,
-            defaultTemperature: temperature
+            response_format: { type: 'json_object' }
         });
 
         let text = await provider.chat(messages);

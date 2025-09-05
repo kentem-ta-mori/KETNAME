@@ -3,7 +3,7 @@
   "displayName": "KETNAME",
   "publisher": "ta-mori",
   "description": "AIが命名を支援するVSCode拡張機能",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "repository": {
     "type": "git",
     "url": "https://github.com/kentem-ta-mori/KETNAME.git"
@@ -62,13 +62,8 @@
         
         "ketname.apim.maxTokens": {
           "type": "number",
-          "default": 512,
+          "default": 5120,
           "description": "APIM経由で呼び出すモデルの最大トークン数"
-        },
-        "ketname.apim.temperature": {
-          "type": "number",
-          "default": 0.2,
-          "description": "APIM経由で呼び出すモデルのTemperature"
         },
         "ketname.domainKnowledgePaths": {
           "type": "array",

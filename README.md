@@ -51,7 +51,6 @@ APIMプロバイダーを選択した場合は、必要に応じて以下の設�
 2. 検索バーに `ketname.apim` と入力します。
 3. 以下の項目を設定します:
    - `ketname.apim.maxTokens`: モデルが生成する最大トークン数。
-   - `ketname.apim.temperature`: 生成されるテキストの多様性。
 
 ## 使用方法
 ※イメージは上記デモをご覧ください
@@ -102,8 +101,7 @@ APIMプロバイダーを選択した場合は、必要に応じて以下の設�
 | 設定項目 | 説明 | デフォルト値 |
 | :--- | :--- | :--- |
 | `ketname.provider` | 命名提案に使用するLLMプロバイダー。`apim` または `gemini`。 | `apim` |
-| `ketname.apim.maxTokens` | APIMモデルの最大生成トークン数。 | `512` |
-| `ketname.apim.temperature` | APIMモデルの生成温度。 | `0.2` |
+| `ketname.apim.maxTokens` | APIMモデルの最大生成トークン数。 | `5120` |
 | `ketname.domainKnowledgePaths` | 命名提案の際にAIが参考にする「ドメイン知識」が記述されたファイルのパス。相対パス・絶対パスの両方に対応。 | `[]` |
 
 ## ライセンス

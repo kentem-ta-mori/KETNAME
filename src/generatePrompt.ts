@@ -9,7 +9,7 @@ export function generatePrompt(codeContext: string, userIntent: string, domainKn
   return `あなたは開発者が変数名やメソッド名を命名するのを助けるAIアシスタントです。
 あなたの目標は、提供された日本語の意図とコードコンテキスト、プロジェクト固有のドメイン知識に基づいて、高品質な名前を提案することです。
 
-以下は、名前を提案してほしい対象のコードコンテキストです。
+以下は、名前を提案してほしい対象のコードコンテキストです。KV（変数名）または、KM（メソッド名）の部分について提案してください。
 \`\`\`typescript
 ${codeContext}
 \`\`\`
@@ -36,22 +36,6 @@ interface LLMSuccessResponse {
     reason: string;    // その名前を選定した理由
     confidence: number; // 0.0から1.0の範囲の自信度
   }[];
-}
-
-例:
-{
-  "suggestions": [
-    {
-      "name": "calculateTotalPrice",
-      "reason": "ショッピングカート内のアイテムの合計金額を計算します。",
-      "confidence": 0.95
-    },
-    {
-      "name": "getTotalPrice",
-      "reason": "保存された値から合計金額を取得します。",
-      "confidence": 0.8
-    }
-  ]
 }
 `;
 }
